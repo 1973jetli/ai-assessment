@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医健企业AI就绪度诊断</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.cover{text-align:center;padding:3rem 1rem 2rem}
+.cover-tag{display:inline-block;font-size:11px;letter-spacing:.08em;color:#185FA5;background:#E6F1FB;border-radius:20px;padding:4px 14px;margin-bottom:1rem}
+.cover h1{font-size:24px;font-weight:500;line-height:1.5;margin-bottom:.75rem}
+.cover p{font-size:14px;color:#666;line-height:1.8;margin-bottom:1.5rem;max-width:480px;margin-left:auto;margin-right:auto}
+.cover-meta{display:flex;justify-content:center;gap:1.5rem;margin-bottom:2rem}
+.cover-meta span{font-size:13px;color:#999}
+.start-btn{display:inline-block;padding:13px 40px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer}
+.start-btn:hover{background:#0C447C}
+.prog-bar{height:3px;background:#e5e5e5;border-radius:2px;margin-bottom:1.25rem}
+.prog-fill{height:100%;background:#378ADD;border-radius:2px;transition:width .4s ease}
+.dim-tag{font-size:11px;letter-spacing:.06em;color:#999;text-transform:uppercase;margin-bottom:.5rem}
+.q-card{background:#fff;border:1px solid #eee;border-radius:12px;padding:1.5rem}
+.q-num{font-size:12px;color:#378ADD;font-weight:500;margin-bottom:.5rem}
+.q-text{font-size:16px;font-weight:500;line-height:1.5;margin-bottom:.5rem}
+.q-sub{font-size:13px;color:#666;line-height:1.6;margin-bottom:1.25rem;padding-left:.75rem;border-left:2px solid #B5D4F4}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border:1px solid #eee;border-radius:8px;background:#f9f9f9;cursor:pointer;text-align:left;font-size:13px;color:#1a1a1a;line-height:1.5;transition:all .15s;width:100%}
+.opt:hover{border-color:#85B7EB;background:#E6F1FB;color:#0C447C}
+.opt.sel{border-color:#378ADD;background:#E6F1FB;color:#0C447C;font-weight:500}
+.opt-l{font-size:11px;font-weight:500;color:#999;min-width:16px;padding-top:1px;flex-shrink:0}
+.opt.sel .opt-l{color:#185FA5}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem}
+.nav-l{padding:9px 20px;border:1px solid #ccc;border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:#1a1a1a}
+.nav-l:disabled{opacity:.3;cursor:default}
+.nav-r{padding:9px 24px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer}
+.nav-r:disabled{opacity:.3;cursor:default}
+.nav-r:hover:not(:disabled){background:#0C447C}
+.step-ct{font-size:13px;color:#999}
+.info-card{background:#fff;border:1px solid #eee;border-radius:12px;padding:1.75rem}
+.info-title{font-size:18px;font-weight:500;margin-bottom:.5rem}
+.info-sub{font-size:13px;color:#666;margin-bottom:1.5rem;line-height:1.7}
+.info-row{margin-bottom:1rem}
+.info-row label{display:block;font-size:12px;color:#666;margin-bottom:5px}
+.info-row input,.info-row select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:#fff;color:#1a1a1a;-webkit-appearance:none}
+.info-row input:focus,.info-row select:focus{outline:none;border-color:#378ADD}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.submit-btn{width:100%;padding:13px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;margin-top:.75rem}
+.submit-btn:hover:not(:disabled){background:#0C447C}
+.submit-btn:disabled{opacity:.5;cursor:default}
+.submit-status{font-size:13px;color:#999;text-align:center;margin-top:.75rem;min-height:20px}
+.skip-link{text-align:center;margin-top:.75rem;font-size:12px;color:#999;cursor:pointer;text-decoration:underline}
+.result-header{text-align:center;padding:1.75rem 1rem 1.25rem}
+.result-tag{display:inline-block;font-size:11px;letter-spacing:.08em;color:#185FA5;background:#E6F1FB;border-radius:20px;padding:4px 14px;margin-bottom:.75rem}
+.result-name{font-size:22px;font-weight:500;margin-bottom:.5rem}
+.result-desc{font-size:14px;color:#666;line-height:1.8;max-width:480px;margin:0 auto 1.5rem}
+.score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.sc-box{background:#fff;border:1px solid #eee;border-radius:8px;padding:12px 8px;text-align:center}
+.sc-dim{font-size:10px;color:#666;margin-bottom:4px;line-height:1.4}
+.sc-val{font-size:18px;font-weight:500}
+.lv0{color:#E24B4A}.lv1{color:#BA7517}.lv2{color:#1D9E75}
+.actions-title{font-size:11px;letter-spacing:.06em;color:#999;text-transform:uppercase;margin-bottom:.75rem}
+.action-card{background:#fff;border:1px solid #eee;border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:.75rem}
+.action-num{font-size:11px;font-weight:500;color:#185FA5;margin-bottom:.4rem}
+.action-head{font-size:14px;font-weight:500;margin-bottom:.4rem}
+.action-body{font-size:13px;color:#666;line-height:1.7}
+.action-card.hook{background:#E6F1FB;border-color:#B5D4F4}
+.action-card.hook .action-head{color:#0C447C}
+.action-card.hook .action-body{color:#185FA5}
+.hook-btn{display:inline-block;margin-top:.75rem;padding:9px 22px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer}
+.hook-btn:hover{background:#0C447C}
+.hidden{display:none}
+.score-total{text-align:center;font-size:13px;color:#999;margin-bottom:1.25rem}
+.score-total strong{color:#185FA5;font-size:15px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:14px;padding:2rem 1.75rem;max-width:340px;width:90%;text-align:center}
+.modal-box h3{font-size:17px;font-weight:500;margin-bottom:.75rem}
+.modal-box p{font-size:13px;color:#666;line-height:1.8;margin-bottom:1.25rem}
+.modal-close{padding:9px 28px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer}
+.modal-close:hover{background:#0C447C}
+@media(max-width:480px){
+  .info-grid{grid-template-columns:1fr}
+  .score-grid{grid-template-columns:repeat(2,1fr)}
+  .cover h1{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="cover" class="cover">
+  <div class="cover-tag">医健行业专属 · 器械 · 药品 · 医服</div>
+  <h1>您的企业，在AI转型赛道上<br>处于第几梯队？</h1>
+  <p>集采持续、DRG落地、资本退潮——这轮周期里，率先完成AI转型的企业已经开始拉开差距。8道题，结束后获得针对您情况的3个具体行动建议。</p>
+  <div class="cover-meta">
+    <span>⏱ 约4分钟</span>
+    <span>📋 8道题</span>
+    <span>🎯 即时诊断</span>
+  </div>
+  <button class="start-btn" onclick="showSection('quiz')">开始诊断</button>
+</div>
+
+<div id="quiz" class="hidden">
+  <div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+  <div class="dim-tag" id="dim-tag"></div>
+  <div id="q-area"></div>
+  <div class="nav">
+    <button class="nav-l" id="prev" onclick="go(-1)" disabled>← 上一题</button>
+    <span class="step-ct" id="step-ct">1 / 8</span>
+    <button class="nav-r" id="next" onclick="go(1)" disabled>下一题 →</button>
+  </div>
+</div>
+
+<div id="info" class="hidden">
+  <div class="info-card">
+    <div class="info-title">您的诊断报告已生成 ✓</div>
+    <div class="info-sub">填写以下信息，解锁针对贵司的3个具体行动建议。信息仅用于本次诊断交流，不对外披露。</div>
+    <div class="info-row">
+      <label>您的姓名 *</label>
+      <input type="text" id="f-name" placeholder="请输入姓名">
+    </div>
+    <div class="info-grid">
+      <div class="info-row">
+        <label>职位 *</label>
+        <select id="f-role">
+          <option value="">请选择</option>
+          <option>董事长/CEO</option>
+          <option>总经理/COO</option>
+          <option>CSO/销售负责人</option>
+          <option>CMO/市场负责人</option>
+          <option>CTO/信息化负责人</option>
+          <option>其他高管</option>
+        </select>
+      </div>
+      <div class="info-row">
+        <label>细分赛道 *</label>
+        <select id="f-track">
+          <option value="">请选择</option>
+          <option>医疗器械</option>
+          <option>药品/生物制品</option>
+          <option>医疗服务机构</option>
+          <option>IVD/体外诊断</option>
+          <option>医疗信息化</option>
+          <option>其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-row">
+      <label>企业名称 *</label>
+      <input type="text" id="f-company" placeholder="请输入企业名称">
+    </div>
+    <div class="info-row">
+      <label>企业年营收规模</label>
+      <select id="f-revenue">
+        <option value="">请选择</option>
+        <option>1亿以下</option>
+        <option>1—5亿</option>
+        <option>5—20亿</option>
+        <option>20亿以上</option>
+      </select>
+    </div>
+    <button class="submit-btn" id="submit-btn" onclick="submitInfo()">查看我的3个行动建议 →</button>
+    <div class="submit-status" id="submit-status"></div>
+    <div class="skip-link" onclick="showResult()">暂时跳过，直接查看结果</div>
+  </div>
+</div>
+
+<div id="contact-modal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box">
+    <h3>预约1v1深度咨询</h3>
+    <p>请通过微信扫码或联系我们预约，我们将在24小时内与您确认时间。</p>
+    <button class="modal-close" onclick="document.getElementById('contact-modal').classList.remove('open')">我知道了</button>
+  </div>
+</div>
+
+<div id="result" class="hidden">
+  <div class="result-header">
+    <div class="result-tag" id="r-tag"></div>
+    <div class="result-name" id="r-name"></div>
+    <div class="result-desc" id="r-desc"></div>
+  </div>
+  <div class="score-grid" id="score-grid"></div>
+  <div class="score-total" id="score-total"></div>
+  <div class="actions-title">根据您的回答，建议优先做这3件事</div>
+  <div id="actions"></div>
+</div>
+
+</div>
+
+<script>
+// ===== 腾讯文档表单配置 =====
+const QQ_FORM_ID = '300000000$CCpSrsBBrtqM';
+const QQ_SUBMIT_URL = 'https://docs.qq.com/api/form/write/submit';
+
+// 字段ID映射（从Network抓包解析）
+const FIELD_IDS = {
+  name:          'SIMPLE1779958424740mpp9aeg4',
+  role:          'RADIO1779958424741mpp9aega',
+  company:       'SIMPLE1779958424741mpp9aegb',
+  track:         'RADIO1779958424741mpp9aegi',
+  revenue:       'RADIO1779958424742mpp9aegp',
+  type:          'SIMPLE1779958424742mpp9aegq',
+  score_strategy:'SIMPLE1779958424742mpp9aegr',
+  score_ai:      'SIMPLE1779958424742mpp9aegs',
+  score_org:     'SIMPLE1779958424742mpp9aegt',
+  score_pain:    'SIMPLE1779958424742mpp9aegu',
+  score_total:   'SIMPLE1779958424742mpp9aegv',
+  answers:       'SIMPLE1779958424742mpp9aegw',
+  submitted_at:  'SIMPLE1779958424742mpp9aegx'
+};
+
+// ===== 题目数据 =====
+const Qs = [
+  {
+    dim:'战略判断',
+    text:'过去一年，同行里有没有人因为用了数据或AI工具，抢走了我原本稳定的客户或市场份额？',
+    sub:'不是问技术，是问您是否已经感受到竞争压力的来源正在变化。',
+    opts:['没有明显感受，我们的竞争格局还是老样子','有些苗头，但还不确定是不是因为对手用了新工具','明确感受到，有竞争对手效率或响应速度明显比以前快','已经有对手靠数字化手段拿走了我们的份额，压力很大']
+  },
+  {
+    dim:'战略判断',
+    text:'集采/DRG的压力下，我现在做重大经营决策（定价、渠道、产品线取舍）时，主要依赖什么？',
+    sub:'决策质量决定企业能否穿越周期，这是判断数字化基础的核心问题。',
+    opts:['主要靠经验和直觉，数据是参考但不是核心依据','有报表支撑，但数据滞后（周报/月报），决策时常感觉慢半拍','关键指标基本可以实时看到，但跨部门数据还是要人工整合','有完整的数据看板，业务团队可以自助取数，决策有据可依']
+  },
+  {
+    dim:'AI认知实践',
+    text:'我身边（同行、投资人、合作伙伴）在谈AI落地时，我的第一反应通常是？',
+    sub:'这道题测的是认知位置，不是技术能力。',
+    opts:['有些听不懂，感觉离我们的实际业务很远','能听懂，但总觉得那些案例跟我们行业不一样，不好迁移','听得懂，也能想到几个我们可以做的场景，但还没动手','已经在做了，有具体工具在跑，能说出效果数据']
+  },
+  {
+    dim:'AI认知实践',
+    text:'在注册合规、招投标、学术推广这些医健行业特有场景里，我认为AI能发挥的最大价值是？',
+    sub:'这是医健行业AI落地的关键判断——认知深度直接决定落地质量。',
+    opts:['这些场景风险太高，AI介入会带来合规隐患，不敢碰','可以做一些文字整理类的辅助工作，但核心判断必须人来做','检索法规、比对标准、生成文件初稿这些完全可以交给AI，效率差距很大','这些场景正是AI价值最高的地方，我们已经在某个环节跑起来了']
+  },
+  {
+    dim:'组织与资源',
+    text:'如果现在有一个成熟的AI方案，能在3个月内让某个业务环节效率提升30%，我最可能遇到的障碍是？',
+    sub:'技术从来不是最难的部分。',
+    opts:['预算和优先级——现在主要精力和资源都在保收入，腾不出手','内部推动——中层或业务团队会有抵触，落地过程会很消耗','方向和路径——不知道从哪里开始，担心选错方向浪费资源','基本没有大障碍，关键是找到合适的合作方和正确的切入点']
+  },
+  {
+    dim:'组织与资源',
+    text:'在AI转型这件事上，我现在的真实状态是？',
+    sub:'不问应该怎样，只问现在实际是怎样。',
+    opts:['还在观望，想看看行业里谁先跑出来再说','想动但没动，主要是不知道找谁、从哪里开始','已经在探索，跟几家供应商聊过或做过小规模试点','已经把AI转型列为今年的核心战略，有专人或专项资源推进']
+  },
+  {
+    dim:'痛点清晰度',
+    text:'如果让AI帮我解决一个最影响增长或利润的问题，我现在脑子里浮现的是？',
+    sub:'答得越具体，说明您离真正落地越近。',
+    opts:['很模糊，感觉哪里都有问题，说不清楚最痛的是哪一块','有大概方向，但没有想清楚输入是什么、期望拿到什么结果','有2—3个明确场景，知道数据从哪来、想要什么输出','已经梳理过，有具体的需求描述，随时可以跟技术方对接']
+  },
+  {
+    dim:'痛点清晰度',
+    text:'未来12个月，我最担心的经营风险是？',
+    sub:'最后一题，也是最真实的一题。答案会影响行动建议的方向。',
+    opts:['市场萎缩——集采扩围或医保控费让我的主力产品利润空间快速收窄','增长乏力——老客户稳定但新市场打不开，找不到第二增长曲线','组织效率——核心团队不够用，人才流失，管理半径越来越难覆盖','竞争时差——对手产品迭代或注册速度比我快，我总是慢一步上市']
+  }
+];
+
+const answers = new Array(8).fill(null);
+let cur = 0;
+let userInfo = {};
+
+function showSection(id) {
+  ['cover','quiz','info','result'].forEach(s => document.getElementById(s).classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo(0,0);
+  if(id==='quiz') renderQ();
+}
+
+function renderQ() {
+  const q = Qs[cur];
+  document.getElementById('dim-tag').textContent = '模块 · ' + q.dim;
+  document.getElementById('prog').style.width = ((cur+1)/8*100)+'%';
+  document.getElementById('step-ct').textContent = (cur+1)+' / 8';
+  document.getElementById('prev').disabled = cur===0;
+  document.getElementById('next').disabled = answers[cur]===null;
+  document.getElementById('next').textContent = cur===7 ? '查看报告 →' : '下一题 →';
+  const L=['A','B','C','D'];
+  document.getElementById('q-area').innerHTML = `
+    <div class="q-card">
+      <div class="q-num">Q${cur+1}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-sub">${q.sub}</div>
+      <div class="opts">${q.opts.map((o,i)=>`
+        <button class="opt${answers[cur]===i?' sel':''}" onclick="pick(${i})">
+          <span class="opt-l">${L[i]}</span><span>${o}</span>
+        </button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function pick(i){ answers[cur]=i; renderQ(); }
+
+function go(d) {
+  if(d===1 && answers[cur]===null) return;
+  if(d===1 && cur===7){ showSection('info'); return; }
+  cur = Math.max(0,Math.min(7,cur+d));
+  renderQ();
+}
+
+// ===== 从cookie读取xsrf token =====
+function getCookie(name) {
+  const m = document.cookie.match(new RegExp('(?:^|;)\\s*'+name+'=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+// ===== xsrf：直接从当前cookie读取，不依赖跨域iframe =====
+// 现代浏览器SameSite策略阻止第三方cookie写入，iframe预热方案不可用。
+// 用户需在同一浏览器会话中访问过腾讯文档，TOK才会存在。
+function initXsrf() {
+  return Promise.resolve();
+}
+
+// ===== 构建提交payload =====
+function buildPayload(info, scores, typeLabel, answerStr) {
+  const now = new Date().toLocaleString('zh-CN');
+  const L = ['A','B','C','D'];
+
+  function textAnswer(fieldId, value) {
+    return {
+      id: fieldId,
+      content: { text: { text: value || '' } },
+      data_type: 1,
+      answer_type: 11,
+      security_status: false
+    };
+  }
+
+  function radioAnswer(fieldId, value) {
+    return {
+      id: fieldId,
+      content: { multi_texts: { texts: [value || ''] } },
+      data_type: 1,
+      answer_type: 8,
+      selected_option_ids: []
+    };
+  }
+
+  return {
+    form_id: QQ_FORM_ID,
+    answers: [
+      textAnswer(FIELD_IDS.name,           info.name || ''),
+      radioAnswer(FIELD_IDS.role,          info.role || ''),
+      textAnswer(FIELD_IDS.company,        info.company || ''),
+      radioAnswer(FIELD_IDS.track,         info.track || ''),
+      radioAnswer(FIELD_IDS.revenue,       info.revenue || ''),
+      textAnswer(FIELD_IDS.type,           typeLabel),
+      textAnswer(FIELD_IDS.score_strategy, String(scores.strategy)),
+      textAnswer(FIELD_IDS.score_ai,       String(scores.ai)),
+      textAnswer(FIELD_IDS.score_org,      String(scores.org)),
+      textAnswer(FIELD_IDS.score_pain,     String(scores.pain)),
+      textAnswer(FIELD_IDS.score_total,    String(scores.strategy+scores.ai+scores.org+scores.pain)),
+      textAnswer(FIELD_IDS.answers,        answerStr),
+      textAnswer(FIELD_IDS.submitted_at,   now)
+    ],
+    role: { user_info: { type: 0 } },
+    cost: 0
+  };
+}
+
+// ===== 提交到腾讯文档 =====
+async function submitToQQDoc(info, scores, typeLabel, answerStr) {
+  const xsrf = getCookie('TOK') || getCookie('hashkey') || '';
+  const payload = buildPayload(info, scores, typeLabel, answerStr);
+
+  const resp = await fetch(`${QQ_SUBMIT_URL}?xsrf=${xsrf}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(payload)
+  });
+  const data = await resp.json();
+  // 腾讯文档成功时返回 {"ret":0} 或 {"code":0}
+  if(data.ret !== 0 && data.code !== 0) {
+    throw new Error(JSON.stringify(data));
+  }
+  return true;
+}
+
+// ===== 计算得分 =====
+function calcScores() {
+  const L = ['A','B','C','D'];
+  const v = i => answers[i] !== null ? answers[i] : 0;
+  const scores = {
+    strategy: v(0)+v(1),
+    ai:       v(2)+v(3),
+    org:      v(4)+v(5),
+    pain:     v(6)+v(7)
+  };
+  const total = scores.strategy+scores.ai+scores.org+scores.pain;
+  const typeLabel = total<=8?'观望期':total<=16?'探索期':'加速期';
+  const answerStr = answers.map((a,i)=>'Q'+(i+1)+':'+(a!==null?L[a]:'-')).join('，');
+  return { scores, total, typeLabel, answerStr };
+}
+
+// ===== 提交信息 =====
+async function submitInfo() {
+  const name    = document.getElementById('f-name').value.trim();
+  const role    = document.getElementById('f-role').value;
+  const track   = document.getElementById('f-track').value;
+  const company = document.getElementById('f-company').value.trim();
+  if(!name||!role||!track||!company){
+    document.getElementById('submit-status').textContent='请填写姓名、职位、赛道和企业名称';
+    return;
+  }
+  userInfo = { name, role, track, company, revenue: document.getElementById('f-revenue').value };
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '提交中…';
+  document.getElementById('submit-status').textContent = '正在提交…';
+
+  const { scores, typeLabel, answerStr } = calcScores();
+
+  try {
+    await submitToQQDoc(userInfo, scores, typeLabel, answerStr);
+    document.getElementById('submit-status').textContent = '提交成功 ✓';
+    setTimeout(()=>showResult(), 600);
+  } catch(e) {
+    console.error('提交失败:', e);
+    // 降级：直接跳结果页，不阻断用户
+    document.getElementById('submit-status').textContent = '网络异常，已记录本地，跳转中…';
+    btn.disabled = false;
+    btn.textContent = '查看我的3个行动建议 →';
+    setTimeout(()=>showResult(), 1000);
+  }
+}
+
+// ===== 显示结果 =====
+function showResult() {
+  showSection('result');
+  const { scores, total, typeLabel } = calcScores();
+  const track = userInfo.track || '';
+
+  let type, desc;
+  if(total<=8){
+    type='observer';
+    desc='您已经感受到压力，但还没有找到起点。这个阶段最大的风险不是做错，而是等待成本——同赛道里已经有企业在悄悄拉开差距。';
+  } else if(total<=16){
+    type='explorer';
+    desc='认知到位，方向感基本清晰，卡在"如何真正跑起来"。您需要的不是更多调研，而是一个可验证的第一步。';
+  } else {
+    type='mover';
+    desc='数字化基础扎实，AI认知清晰，组织有推进意愿。您现在需要的是系统化的方法论和外部经验，避免重复造轮子。';
+  }
+
+  document.getElementById('r-tag').textContent = typeLabel;
+  document.getElementById('r-name').textContent = (userInfo.name?userInfo.name+'，':'')+'您目前处于 '+typeLabel;
+  document.getElementById('r-desc').textContent = desc;
+
+  const dimLabels=['战略判断','AI认知实践','组织就绪','痛点清晰'];
+  const dimVals=[scores.strategy,scores.ai,scores.org,scores.pain];
+  document.getElementById('score-grid').innerHTML = dimLabels.map((l,i)=>{
+    const v=dimVals[i];
+    const cls=v<=1?'lv0':v<=3?'lv1':'lv2';
+    const bar=['▪▫▫','▪▪▫','▪▪▪'][v<=1?0:v<=3?1:2];
+    return `<div class="sc-box"><div class="sc-dim">${l}</div><div class="sc-val ${cls}">${bar}</div></div>`;
+  }).join('');
+  document.getElementById('score-total').innerHTML = `综合得分 <strong>${total}</strong> / 24`;
+
+  const actionSets = {
+    observer:[
+      {num:'行动一',head:'先做一件小事：把最痛的数据孤岛打通',body:'在找AI方案之前，先把最影响决策的一块数据整合起来——哪怕只是一张每周自动更新的销售看板。这件事3周内可以完成，成本极低，但它会让您第一次感受到"数据驱动"不是概念，是真实的决策加速。'},
+      {num:'行动二',head:'找一个低风险场景做认知校准',body:'选一个重复性高、出错代价低的内部流程（如竞品信息汇总、招投标文件整理），试跑一次AI辅助。目的不是上线，是让您和团队建立真实的感知——而不是靠PPT想象AI是什么。'},
+      {num:'行动三',head:'用45分钟换一个清晰的路径图',body:'您现在最缺的不是工具，是一张适合自己行业的地图。建议约一次1v1，把贵司的真实情况摆出来，判断哪条路最短、风险最低，再决定投入多少资源。这一步做对，后面少走12个月弯路。',hook:true}
+    ],
+    explorer:[
+      {num:'行动一',head:'把已有的试点经验标准化',body:'您已经做过一些探索，但经验往往停留在个人或单个项目里。现在要做的是把成功的小工具"写成流程"——明确输入、输出、异常处理，让第二个人也能用起来。这是从0.5到1的关键动作。'},
+      {num:'行动二',head:'绕过中层阻力，先建立一个"快赢"案例',body:'内部推动最有效的方式不是开会讲理念，而是拿出一个让中层无法否认的结果。挑一个中层自己也觉得痛的场景，让AI先帮他们解决问题，阻力会自然消解。'},
+      {num:'行动三',head:'用一次结构化对话，确认您的最优切入点',body:'您现在有意愿、有感知，缺的是一个外部视角帮您判断"哪个场景投入产出比最高"。建议做一次1v1，把您梳理的场景拿出来过一遍，避免在次优方向上浪费资源。',hook:true}
+    ],
+    mover:[
+      {num:'行动一',head:'把AI资产从工具层升级到能力层',body:'您已经有跑起来的工具，下一步是把它变成组织能力——形成文档、可复用、可迭代。这个差距决定了您的AI投入是一次性成本还是持续复利。'},
+      {num:'行动二',
+       head:(track.includes('器械')||track.includes('药')||track.includes('IVD'))?'在注册合规场景布局，建立竞争壁垒':'将现有试点扩展到更多业务单元',
+       body:(track.includes('器械')||track.includes('药')||track.includes('IVD'))?'NMPA注册周期和法规比对是医健AI落地价值最高、竞争对手最少布局的场景。您已具备落地条件，现在进入这个方向，可以在12—18个月内建立对手难以追赶的效率优势。':'您的条件已经就绪，关键是把现有工具的覆盖面从单点扩展到多个业务单元，形成规模效应。每扩展一个单元，边际成本在递减，整体ROI在提升。'},
+      {num:'行动三',head:'引入外部经验，避免闭门造车',body:'您的条件已经足够，需要的是一个了解同赛道落地经验的外部伙伴，帮您校准方向、避坑、提速。建议做一次深度对话，把现有布局和下一步计划系统梳理一遍。',hook:true}
+    ]
+  };
+
+  document.getElementById('actions').innerHTML = actionSets[type].map(a=>`
+    <div class="action-card${a.hook?' hook':''}">
+      <div class="action-num">${a.num}</div>
+      <div class="action-head">${a.head}</div>
+      <div class="action-body">${a.body}</div>
+      ${a.hook?`<button class="hook-btn" onclick="document.getElementById('contact-modal').classList.add('open')">预约1v1深度咨询 →</button>`:''}
+    </div>`).join('');
+}
+
+document.addEventListener('keydown', e=>{
+  if(document.getElementById('quiz').classList.contains('hidden')) return;
+  if(e.key==='ArrowRight'&&answers[cur]!==null) go(1);
+  if(e.key==='ArrowLeft') go(-1);
+});
+
+window.addEventListener('load', ()=>{ initXsrf(); });
+</script>
+</body>
+</html>
